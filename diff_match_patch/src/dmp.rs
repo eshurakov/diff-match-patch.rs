@@ -159,7 +159,7 @@ impl Dmp {
     #[allow(dead_code)]
     pub fn new() -> Self {
         // it will give a new dmp object.
-        Dmp { patch_delete_threshold: 0.5, text1: "".to_string(), text2: "".to_string(), edit_cost: 0, match_distance: 1000, patch_margin: 4, match_maxbits: 32, match_threshold: 0.5}
+        Dmp { patch_delete_threshold: 0.5, text1: "".to_string(), text2: "".to_string(), edit_cost: 4, match_distance: 1000, patch_margin: 4, match_maxbits: 32, match_threshold: 0.5}
     }
 
     #[allow(dead_code)]
