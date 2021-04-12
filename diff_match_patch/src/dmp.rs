@@ -56,6 +56,12 @@ pub struct Patch {
     pub length1: i32,
     pub length2: i32
 }
+
+pub enum Unit {
+    UnicodeScalar,
+    UTF16
+}
+
 impl Diff {
     // A new diff diff object created.
     #[allow(dead_code)]
@@ -1777,7 +1783,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn diff_todelta(&mut self, diffs: &mut Vec<Diff>) -> String {
+    pub fn diff_todelta(&mut self, diffs: &mut Vec<Diff>, unit: Unit) -> String {
         /*
         Crush the diff into an encoded string which describes the operations
         required to transform text1 into text2.
@@ -1798,13 +1804,11 @@ impl Dmp {
                 let temp5: Vec<char> = vec!['!', '~', '*', '(', ')', ';', '/', '?', ':', '@', '&', '=', '+', '$', ',', '#', ' ', '\''];
                 let temp4: Vec<char> = diffs_item.text.chars().collect();
                 text += "+";
-                let mut text1 = "".to_string();
                 for temp4_item in &temp4 {
                     let mut is = false;
                     for temp5_item in &temp5 {
                         if *temp5_item == *temp4_item {
                             text.push(*temp4_item);
-                            text1.push(*temp4_item);
                             is = true;
                             break;
                         }
@@ -1816,19 +1820,28 @@ impl Dmp {
                     temp6.push(*temp4_item);
                     temp6 = utf8_percent_encode(temp6.as_str(), USERINFO_ENCODE_SET).collect();
                     text += temp6.as_str();
-                    text1 += temp6.as_str();
                 }
             }
-            else if diffs_item.operation == -1 {
-                let temp4: String = utf8_percent_encode(diffs_item.text.chars().count().to_string().as_str(), DEFAULT_ENCODE_SET).collect();
-                text += "-";
-                text += temp4.as_str();
-            }
             else {
-                let temp4: String = utf8_percent_encode(diffs_item.text.chars().count().to_string().as_str(), DEFAULT_ENCODE_SET).collect();
-                text += "=";
-                text += temp4.as_str();
+                if diffs_item.operation == -1 {
+                    text += "-";
+                }
+                else {
+                    text += "=";
+                }
+
+                let count: usize;
+                match unit {
+                    Unit::UnicodeScalar => {
+                        count = diffs_item.text.chars().count();
+                    },
+                    Unit::UTF16 => {
+                        count = diffs_item.text.encode_utf16().count();
+                    },
+                }
+                text += count.to_string().as_str();
             }
+            
             if k < len - 1 {
                 text += "\t";
             }
