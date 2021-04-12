@@ -1783,7 +1783,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn diff_todelta(&mut self, diffs: &mut Vec<Diff>, unit: Unit) -> String {
+    pub fn diff_to_delta(&mut self, diffs: &mut Vec<Diff>, unit: Unit) -> String {
         /*
         Crush the diff into an encoded string which describes the operations
         required to transform text1 into text2.
