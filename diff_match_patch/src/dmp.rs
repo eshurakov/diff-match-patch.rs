@@ -5,6 +5,7 @@ Applies the patch onto another text, allowing for errors.
 */
 
 use std::fmt;
+use std::cmp;
 use core::char;
 use std::iter::FromIterator;
 use std::collections::HashMap;
@@ -153,13 +154,56 @@ impl fmt::Debug for Patch {
     }
 }
 
+trait StringView {
+    fn len(&self) -> usize;
+    fn slice(&self, range: std::ops::Range<usize>) -> String;
+}
 
+struct StringScalarView {
+    text: Vec<char>
+}
 
+impl StringScalarView {
+    #[allow(dead_code)]
+    pub fn new(text: &str) -> StringScalarView {
+        StringScalarView {
+            text: text.chars().collect()
+        }
+    } 
+}
 
+impl StringView for StringScalarView {
+    fn len(&self) -> usize {
+        self.text.len()
+    }
 
+    fn slice(&self, range: std::ops::Range<usize>) -> String {
+        (&self.text)[range].iter().collect()
+    }
+}
 
+struct StringUTF16View {
+    text: Vec<u16>
+}
 
+impl StringUTF16View {
+    #[allow(dead_code)]
+    pub fn new(text: &str) -> StringUTF16View {
+        StringUTF16View {
+            text: text.encode_utf16().collect()
+        }
+    }
+}
 
+impl StringView for StringUTF16View {
+    fn len(&self) -> usize {
+        self.text.len()
+    }
+
+    fn slice(&self, range: std::ops::Range<usize>) -> String {
+        String::from_utf16(&self.text[range]).unwrap()
+    }
+}
 
 impl Dmp {
     #[allow(dead_code)]
@@ -1850,62 +1894,74 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn diff_from_delta(&mut self, text1: &str, delta: &str) -> Vec<Diff> {
+    pub fn diff_from_delta(&mut self, text1: &str, delta: &str, unit: Unit) -> Vec<Diff> {
         /*
-        Given the original text1, and an encoded string which describes the
-        operations required to transform text1 into text2, compute the full diff.
+            Given the original text1, and an encoded string which describes the
+            operations required to transform text1 into text2, compute the full diff.
 
-        Args:
-            text1: Source string for the diff.
-            delta: Delta text.
+            Args:
+                text1: Source string for the diff.
+                delta: Delta text.
 
-        Returns:
-            Vector of diff object.
+            Returns:
+                Vector of diff object.
 
-        Raises:
-            ValueError: If invalid input.
-      */
+            Raises:
+                ValueError: If invalid input.
+        */
+
+        match unit {
+            Unit::UnicodeScalar => {
+                let text = StringScalarView::new(text1);
+                return self.diff_from_delta_string_view(&text, delta);
+            },
+            Unit::UTF16 => {
+                let text = StringUTF16View::new(text1);
+                return self.diff_from_delta_string_view(&text, delta);
+            },
+        }
+    }
+
+    fn diff_from_delta_string_view(&mut self, text1: &impl StringView, delta: &str) -> Vec<Diff> {
         let mut diffs: Vec<Diff> = vec![];
         let tokens: Vec<&str> = (*delta).split('\t').collect();
-        let text1_vec: Vec<char> = text1.chars().collect();
-        let len = text1.chars().count();
+
         let mut text_len = 0;
         for token in tokens {
-            if token =="" {
+            if token == "" {
                 continue;
             }
-            let token_vec: Vec<char> = token.chars().collect();
-            let operation: String = (&token_vec)[0..1].iter().collect();
-            let text: String = (&token_vec)[1..].iter().collect();
-            let text2 = percent_decode(text.as_bytes()).decode_utf8().unwrap().to_string();
-            if operation.as_str() == "+" {
-                diffs.push(Diff::new(1, text2));
-            }
-            else if operation.as_str() == "=" {
-                let str_size = text2.as_str().parse::<i32>().unwrap();
-                if str_size as usize + text_len > len {
+            
+            let operation = &token[0..1];
+            let operation_content = &token[1..];
+
+            if operation == "+" {
+                let text = percent_decode(operation_content.as_bytes()).decode_utf8().unwrap().to_string();
+                diffs.push(Diff::new(1, text));
+            } else {
+                let str_size = operation_content.parse::<usize>().unwrap();
+                if str_size + text_len > text1.len() {
                     panic!("wrong patern or text");
                 }
-                let temp8: String = (&text1_vec)[max(text_len as i32, 0) as usize..min(str_size + text_len as i32, text1_vec.len() as i32) as usize].iter().collect();
-                diffs.push(Diff::new(0, temp8));
-                text_len += str_size as usize;
-            }
-            else{
-                
-                let str_size = text2.as_str().parse::<i32>().unwrap();
-                if str_size as usize + text_len > len {
-                    panic!("wrong patern or text");
-                }
-                let temp8: String = (&text1_vec)[max(text_len as i32, 0)as usize..min(text1_vec.len() as i32, text_len as i32 + str_size as i32) as usize].iter().collect();
-                diffs.push(Diff::new(-1, temp8));
-                text_len += str_size as usize;
+
+                let range = text_len..(str_size + text_len);
+                let text = text1.slice(range);
+
+                diffs.push(Diff::new(
+                    if operation == "=" { 0 } else { -1 }, 
+                    text
+                ));
+
+                text_len += str_size;
             }
         }
-        if len != text_len {
+
+        if text1.len() != text_len {
             panic!("wrong patern or text");
         }
+
         diffs
-    } 
+    }
 
     #[allow(dead_code)]
     pub fn match_main(&mut self, text1: &str, patern1: &str, mut loc: i32) -> i32 {

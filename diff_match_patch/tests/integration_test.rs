@@ -419,7 +419,7 @@ pub fn test_diff_delta() {
     assert_eq!("=4\t-1\t+ed\t=6\t-3\t+a\t=5\t+old dog".to_string(), delta);
 
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta, diff_match_patch::Unit::UnicodeScalar));
 
     // # Generates error (19 != 20).
     // try:
@@ -454,7 +454,7 @@ pub fn test_diff_delta() {
     delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!("=7\t-7\t+%DA%82 %02 %5C %7C".to_string(), delta);
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta, diff_match_patch::Unit::UnicodeScalar));
 
     // Verify pool of unchanged characters.
     diffs = vec![diff_match_patch::Diff::new(1, "A-Z a-z 0-9 - _ . ! ~ * ' ( ) ; / ? : @ & = + $ , # ".to_string())];
@@ -465,7 +465,7 @@ pub fn test_diff_delta() {
     assert_eq!("+A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ".to_string(), delta);
 
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&("".to_string()), &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&("".to_string()), &delta, diff_match_patch::Unit::UnicodeScalar));
 
     // 160 kb string.
     let mut a = "abcdefghij".to_string();
@@ -477,7 +477,7 @@ pub fn test_diff_delta() {
     assert_eq!('+'.to_string() + a.as_str(), delta);
 
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&"".to_string(), &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&"".to_string(), &delta, diff_match_patch::Unit::UnicodeScalar));
 }
 
 
