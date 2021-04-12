@@ -1798,7 +1798,7 @@ impl Dmp {
       */
         let mut text: String = "".to_string();
         let len = diffs.len();
-        for (k, diffs_item) in diffs.iter().enumerate().take(len) {
+        for (k, diffs_item) in diffs.iter().enumerate() {
             if diffs_item.operation == 1 {
                 // High ascii will raise UnicodeDecodeError.  Use Unicode instead.
                 let temp5: Vec<char> = vec!['!', '~', '*', '(', ')', ';', '/', '?', ':', '@', '&', '=', '+', '$', ',', '#', ' ', '\''];
