@@ -415,7 +415,7 @@ pub fn test_diff_delta() {
     let mut diffs = vec![diff_match_patch::Diff::new(0, "jump".to_string()), diff_match_patch::Diff::new(-1, "s".to_string()), diff_match_patch::Diff::new(1, "ed".to_string()), diff_match_patch::Diff::new(0, " over ".to_string()), diff_match_patch::Diff::new(-1, "the".to_string()), diff_match_patch::Diff::new(1, "a".to_string()), diff_match_patch::Diff::new(0, " lazy".to_string()), diff_match_patch::Diff::new(1, "old dog".to_string())];
     let mut text1 = dmp.diff_text1(&mut diffs);
     assert_eq!("jumps over the lazy".to_string(), text1);
-    let mut delta = dmp.diff_todelta(&mut diffs);
+    let mut delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!("=4\t-1\t+ed\t=6\t-3\t+a\t=5\t+old dog".to_string(), delta);
 
     // Convert delta string into a diff.
@@ -451,7 +451,7 @@ pub fn test_diff_delta() {
     text1 = dmp.diff_text1(&mut diffs);
     assert_eq!("\u{0680} \x00 \t %\u{0681} \x01 \n ^".to_string(), text1);
 
-    delta = dmp.diff_todelta(&mut diffs);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!("=7\t-7\t+%DA%82 %02 %5C %7C".to_string(), delta);
     // Convert delta string into a diff.
     assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta));
@@ -461,7 +461,7 @@ pub fn test_diff_delta() {
     let text2 = dmp.diff_text2(&mut diffs);
     assert_eq!("A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ".to_string(), text2);
 
-    delta = dmp.diff_todelta(&mut diffs);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!("+A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ".to_string(), delta);
 
     // Convert delta string into a diff.
@@ -473,7 +473,7 @@ pub fn test_diff_delta() {
         a += a.clone().as_str();
     }
     diffs = vec![diff_match_patch::Diff::new(1, a.clone())];
-    delta = dmp.diff_todelta(&mut diffs);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!('+'.to_string() + a.as_str(), delta);
 
     // Convert delta string into a diff.
