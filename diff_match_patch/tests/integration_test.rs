@@ -478,8 +478,110 @@ pub fn test_diff_delta() {
 
     // Convert delta string into a diff.
     assert_eq!(diffs, dmp.diff_from_delta(&"".to_string(), &delta, diff_match_patch::Unit::UnicodeScalar));
+
+    // Emoji
+    diffs = dmp.diff_main("☺️🖖🏿", "☺️😃🖖🏿", false);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16);
+    assert_eq!(delta, "=2\t+%F0%9F%98%83\t=4");
+
+    diffs = dmp.diff_main("☺️🖖🏿", "☺️😃🖖🏿", false);
+    let mut patches = dmp.patch_make2(&mut diffs);
+    let (patched_text_vec, _) = dmp.patch_apply(&mut patches, "☺️🖖🏿");
+    let patched_text: String = patched_text_vec.into_iter().collect();
+    assert_eq!(patched_text, "☺️😃🖖🏿");
 }
 
+#[test]
+pub fn test_diff_delta_surrogates() {
+    let mut dmp = diff_match_patch::Dmp::new();
+
+    // Inserting similar surrogate pair at beginning
+    let mut diffs = dmp.diff_main("🅰🅱", "🅱🅰🅱", false);
+    let mut expected_diffs = vec![
+        diff_match_patch::Diff::new(1, "🅱".to_string()),
+        diff_match_patch::Diff::new(0, "🅰🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Inserting similar surrogate pair in the middle
+    diffs = dmp.diff_main("🅱🅱", "🅱🅰🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(0, "🅱".to_string()),
+        diff_match_patch::Diff::new(1, "🅰".to_string()),
+        diff_match_patch::Diff::new(0, "🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Deleting similar surrogate pair at the beginning
+    diffs = dmp.diff_main("🅱🅰🅱", "🅰🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(-1, "🅱".to_string()),
+        diff_match_patch::Diff::new(0, "🅰🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Deleting similar surrogate pair in the middle
+    diffs = dmp.diff_main("🅰🅲🅱", "🅰🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(0, "🅰".to_string()),
+        diff_match_patch::Diff::new(-1, "🅲".to_string()),
+        diff_match_patch::Diff::new(0, "🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Swapping surrogate pairs
+    diffs = dmp.diff_main("🅰", "🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(-1, "🅰".to_string()),
+        diff_match_patch::Diff::new(1, "🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+}
+
+#[test]
+pub fn test_diff_to_delta_unit() {
+    let mut dmp = diff_match_patch::Dmp::new();
+
+    // UTF16
+    let mut diffs = dmp.diff_main("🅰", "🅱", false);
+    let mut delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16);
+    assert_eq!(delta, "-2\t+%F0%9F%85%B1");
+
+    // Scalar
+    let mut diffs = dmp.diff_main("🅰", "🅱", false);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
+    assert_eq!(delta, "-1\t+%F0%9F%85%B1");
+}
+
+#[test]
+pub fn test_diff_from_delta_unit() {
+    let mut dmp = diff_match_patch::Dmp::new();
+
+    // UTF16
+    let mut delta = "-2\t=2\t+%F0%9F%85%B1";
+    let mut diffs = dmp.diff_from_delta("🅰🅲", delta, diff_match_patch::Unit::UTF16);
+    assert_eq!(dmp.diff_text2(&mut diffs), "🅲🅱");
+
+    // Scalar
+    delta = "-1\t=1\t+%F0%9F%85%B1";
+    diffs = dmp.diff_from_delta("🅰🅲", delta, diff_match_patch::Unit::UnicodeScalar);
+    assert_eq!(dmp.diff_text2(&mut diffs), "🅲🅱");
+}
 
 #[test]
 pub fn test_diff_xindex() {
