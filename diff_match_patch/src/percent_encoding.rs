@@ -9,7 +9,7 @@ impl fmt::Display for DecodeError {
 }
 impl std::error::Error for DecodeError {}
 
-#[allow(dead_code)]
+
 pub fn percent_decode_u16(input: &[u8]) -> Result<Vec<u16>, Box<dyn std::error::Error>> {
     let mut input_iter = input.iter();
     let mut result: Vec<u16> = Vec::new();
@@ -101,4 +101,27 @@ fn next_percent_encoded_byte(iter: &mut std::slice::Iter<u8>, skip_percent: bool
     let l = iter.next().and_then(|&b| (b as char).to_digit(16)).unwrap();
 
     (h as u8 * 0x10 + l as u8) as u16
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode_full_surrogate_pair() {
+        let result = percent_decode_u16("%F0%9F%85%B1".as_bytes());
+        assert_eq!(result.unwrap(), vec![55356, 56689]);
+    }
+
+    #[test]
+    fn test_decode_half_surrogate_pair() {
+        let result = percent_decode_u16("%ED%B5%B1".as_bytes());
+        assert_eq!(result.unwrap(), vec![56689]);
+    }
+
+    #[test]
+    fn test_decode_keeps_non_percent_encoded_data() {
+        let result = percent_decode_u16("123%ED%B5%B1".as_bytes());
+        assert_eq!(result.unwrap(), vec![49, 50, 51, 56689]);
+    }
 }
