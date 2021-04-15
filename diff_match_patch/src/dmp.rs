@@ -5,7 +5,6 @@ Applies the patch onto another text, allowing for errors.
 */
 
 use std::fmt;
-use std::cmp;
 use core::char;
 use std::iter::FromIterator;
 use std::collections::HashMap;
@@ -15,7 +14,6 @@ extern crate  url;
 use url::percent_encoding::{
     utf8_percent_encode,
     percent_decode,
-    DEFAULT_ENCODE_SET,
     USERINFO_ENCODE_SET,
     };
 #[allow(dead_code)]
@@ -59,7 +57,9 @@ pub struct Patch {
 }
 
 pub enum Unit {
+    #[allow(dead_code)]
     UnicodeScalar,
+    #[allow(dead_code)]
     UTF16
 }
 
@@ -749,6 +749,7 @@ impl Dmp {
         diffs
     }
 
+    #[allow(dead_code)]
     pub fn diff_words_tochars(&mut self, text1: &String, text2: &String) -> (String, String, Vec<String>) {
         /*
         Split two texts into an array of strings.  Reduce the texts to a string
@@ -979,8 +980,8 @@ impl Dmp {
         if text1_length == 0 || text2_length == 0 {
             return 0;
         }
-        let mut text1_trunc;
-        let mut text2_trunc;
+        let text1_trunc;
+        let text2_trunc;
         let len = min(text1_length as i32, text2_length as i32);
 
         // Truncate the longer chars.
