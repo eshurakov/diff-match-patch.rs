@@ -19,7 +19,7 @@ pub fn diff_rebuildtexts( diffs: Vec<diff_match_patch::Diff>) -> Vec<String> {
 
 #[test]
 pub fn test_diff_common_prefix() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.diff_common_prefix(&("abc".to_string().chars().collect()), &("xyz".to_string().chars().collect())));
 
     assert_eq!(4, dmp.diff_common_prefix(&("1234abcdef".to_string().chars().collect()), &("1234xyz".to_string().chars().collect())));
@@ -30,7 +30,7 @@ pub fn test_diff_common_prefix() {
 
 #[test]
 pub fn test_diff_common_suffix() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.diff_common_suffix(&("abc".to_string().chars().collect()), &("xyz".to_string().chars().collect())));
 
     assert_eq!(4, dmp.diff_common_suffix(&("abcdef1234".to_string().chars().collect()), &("xyz1234".to_string().chars().collect())));
@@ -41,7 +41,7 @@ pub fn test_diff_common_suffix() {
 
 #[test]
 pub fn test_diff_common_overlap() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.diff_common_overlap(&("".to_string().chars().collect()), &("abcd".to_string().chars().collect())));
 
     assert_eq!(3, dmp.diff_common_overlap(&("abc".to_string().chars().collect()), &("abcd".to_string().chars().collect())));
@@ -53,7 +53,7 @@ pub fn test_diff_common_overlap() {
 
 #[test]
 pub fn test_diff_half_match() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let temp: Vec<String> = vec![];
     assert_eq!(temp, dmp.diff_half_match(&("1234567890".to_string().chars().collect()), &("abcdef".to_string().chars().collect())));
     assert_eq!(temp, dmp.diff_half_match(&("12345".to_string().chars().collect()), &("23".to_string().chars().collect())));
@@ -70,7 +70,7 @@ pub fn test_diff_half_match() {
 
 #[test]
 pub fn test_diff_lines_tochars() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(("\x01\x02\x01".to_string(), "\x02\x01\x02".to_string(), vec!["".to_string(), "alpha\n".to_string(), "beta\n".to_string()]),
                 dmp.diff_lines_tochars(&("alpha\nbeta\nalpha\n".to_string().chars().collect()), &("beta\nalpha\nbeta\n".to_string().chars().collect())));
     assert_eq!(("".to_string(), "\x01\x02\x03\x03".to_string(), vec!["".to_string(), "alpha\r\n".to_string(), "beta\r\n".to_string(), "\r\n".to_string()]), dmp.diff_lines_tochars(&("".to_string().chars().collect()), &("alpha\r\nbeta\r\n\r\n\r\n".to_string().chars().collect())));
@@ -98,7 +98,7 @@ pub fn test_diff_lines_tochars() {
 
 #[test]
 pub fn test_diff_words_tochars() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(("\x01\x02\x03\x02\x01".to_string(), "\x03\x02\x01\x02\x03".to_string(), vec!["".to_string(), "alpha".to_string(), " ".to_string(), "beta".to_string()]),
                 dmp.diff_words_tochars(&"alpha beta alpha".to_string(), &"beta alpha beta".to_string())
                );               
@@ -135,7 +135,7 @@ pub fn test_diff_words_tochars() {
 
 #[test]
 pub fn test_diff_chars_tolines() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs = vec![diff_match_patch::Diff::new(0, "\x01\x02\x01".to_string()), diff_match_patch::Diff::new(1, "\x02\x01\x02".to_string())];
     dmp.diff_chars_tolines(&mut diffs, &vec!["".to_string(), "alpha\n".to_string(), "beta\n".to_string()]);
     assert_eq!(vec![diff_match_patch::Diff::new(0, "alpha\nbeta\nalpha\n".to_string()), diff_match_patch::Diff::new(1, "beta\nalpha\nbeta\n".to_string())], diffs);
@@ -177,7 +177,7 @@ pub fn test_diff_chars_tolines() {
 
 #[test]
 pub fn test_diff_cleanup_merge() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
     let temp: Vec<diff_match_patch::Diff> = vec![];
     dmp.diff_cleanup_merge(&mut diffs);
@@ -256,7 +256,7 @@ pub fn test_diff_cleanup_merge() {
 pub fn test_diff_cleanup_semantic_lossless() {
     // Slide diffs to match logical boundaries.
     // Null case.
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
     let temp: Vec<diff_match_patch::Diff> = vec![];
     dmp.diff_cleanup_semantic_lossless(&mut diffs);
@@ -302,7 +302,7 @@ pub fn test_diff_cleanup_semantic_lossless() {
 
 #[test]
 pub fn test_diff_cleanup_semantic() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
 
     //  Null case.
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
@@ -363,7 +363,7 @@ pub fn test_diff_cleanup_semantic() {
 
 #[test]
 pub fn test_diff_cleanup_efficiency() { 
-    let mut dmp = diff_match_patch::Dmp::new();  
+    let dmp = diff_match_patch::Dmp::new();  
     dmp.edit_cost = 4;
     // Null case.
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
@@ -401,7 +401,7 @@ pub fn test_diff_cleanup_efficiency() {
 
 #[test]
 pub fn test_diff_text() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs: Vec<diff_match_patch::Diff> = vec![diff_match_patch::Diff::new(0, "jump".to_string()), diff_match_patch::Diff::new(-1, "s".to_string()), diff_match_patch::Diff::new(1, "ed".to_string()), diff_match_patch::Diff::new(0, " over ".to_string()), diff_match_patch::Diff::new(-1, "the".to_string()), diff_match_patch::Diff::new(1, "a".to_string()), diff_match_patch::Diff::new(0, " lazy".to_string())];
     assert_eq!("jumps over the lazy".to_string(), dmp.diff_text1(&mut diffs));
     assert_eq!("jumped over a lazy".to_string(), dmp.diff_text2(&mut diffs));
@@ -411,7 +411,7 @@ pub fn test_diff_text() {
 #[test]
 pub fn test_diff_delta() {
 
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs = vec![diff_match_patch::Diff::new(0, "jump".to_string()), diff_match_patch::Diff::new(-1, "s".to_string()), diff_match_patch::Diff::new(1, "ed".to_string()), diff_match_patch::Diff::new(0, " over ".to_string()), diff_match_patch::Diff::new(-1, "the".to_string()), diff_match_patch::Diff::new(1, "a".to_string()), diff_match_patch::Diff::new(0, " lazy".to_string()), diff_match_patch::Diff::new(1, "old dog".to_string())];
     let mut text1 = dmp.diff_text1(&mut diffs);
     assert_eq!("jumps over the lazy".to_string(), text1);
@@ -493,7 +493,7 @@ pub fn test_diff_delta() {
 
 #[test]
 pub fn test_diff_delta_surrogates() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
 
     // Inserting similar surrogate pair at beginning
     let mut diffs = dmp.diff_main("🅰🅱", "🅱🅰🅱", false);
@@ -555,7 +555,7 @@ pub fn test_diff_delta_surrogates() {
 
 #[test]
 pub fn test_diff_to_delta_unit() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
 
     // UTF16
     let mut diffs = dmp.diff_main("🅰", "🅱", false);
@@ -570,7 +570,7 @@ pub fn test_diff_to_delta_unit() {
 
 #[test]
 pub fn test_diff_from_delta_unit() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
 
     // UTF16
     let mut delta = "-2\t=2\t+%F0%9F%85%B1";
@@ -592,7 +592,7 @@ pub fn test_diff_xindex() {
 #[test]
 pub fn test_diff_levenshtein() {
 
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(4, dmp.diff_levenshtein(&mut vec![diff_match_patch::Diff::new(-1, "abc".to_string()), diff_match_patch::Diff::new(1, "1234".to_string()), diff_match_patch::Diff::new(0, "xyz".to_string())]));
     // Levenshtein with leading equality.
     assert_eq!(4, dmp.diff_levenshtein(&mut vec![diff_match_patch::Diff::new(0, "xyz".to_string()), diff_match_patch::Diff::new(-1, "abc".to_string()), diff_match_patch::Diff::new(1, "1234".to_string())]));
@@ -603,7 +603,7 @@ pub fn test_diff_levenshtein() {
 
 #[test]
 pub fn test_diff_bisect() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let a = "cat".to_string();
     let b = "map".to_string();
     assert_eq!(vec![diff_match_patch::Diff::new(-1, "c".to_string()), diff_match_patch::Diff::new(1, "m".to_string()), diff_match_patch::Diff::new(0, "a".to_string()), diff_match_patch::Diff::new(-1, "t".to_string()), diff_match_patch::Diff::new(1, "p".to_string())] , dmp.diff_bisect(&a.chars().collect(), &b.chars().collect()));
@@ -652,7 +652,7 @@ pub fn test_diff_main() {
 
 #[test]
 pub fn test_match_apphabet() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut s: HashMap<char,i32> = HashMap::new();
     s.insert('a', 4);
     s.insert('b', 2);
@@ -667,7 +667,7 @@ pub fn test_match_apphabet() {
 
 #[test]
 pub fn test_match_bitap() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     dmp.match_distance = 100;
     dmp.match_threshold = 0.5;
     assert_eq!(5, dmp.match_bitap(&("abcdefghijk".chars().collect()), &("fgh".chars().collect()), 5));
@@ -717,7 +717,7 @@ pub fn test_match_bitap() {
 
 #[test]
 pub fn test_match_main() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.match_main("abcdef", "abcdef", 1000));
 
     assert_eq!(-1, dmp.match_main("", "abcdef", 1));
@@ -750,7 +750,7 @@ pub fn test_patch_obj() {
 
 #[test]
 pub fn test_patch_from_text() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let diffs: Vec<diff_match_patch::Patch> = vec![];
     assert_eq!(diffs, dmp.patch_from_text("".to_string()));
     
@@ -766,7 +766,7 @@ pub fn test_patch_from_text() {
 
 #[test]
 pub fn test_patch_to_text() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let  mut strp = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n  laz\n".to_string();
     let mut p = dmp.patch_from_text(strp.clone());
     assert_eq!(strp, dmp.patch_to_text(&mut p));
@@ -780,7 +780,7 @@ pub fn test_patch_to_text() {
 #[test]
 pub fn test_patch_add_context()
 {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     dmp.patch_margin = 4;
     let mut p = dmp.patch_from_text("@@ -21,4 +21,10 @@\n-jump\n+somersault\n".to_string())[0].clone();
     dmp.patch_add_context(&mut p, &mut ("The quick brown fox jumps over the lazy dog.".chars().collect()));
@@ -805,7 +805,7 @@ pub fn test_patch_add_context()
 
 #[test]
 pub fn test_patch_make() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     // Null case.
     let mut patches = dmp.patch_make1("", "");
     assert_eq!("".to_string(), dmp.patch_to_text(&mut patches));
@@ -859,7 +859,7 @@ pub fn test_patch_make() {
 
 #[test]
 pub fn test_patch_splitmax() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     // Assumes that Match_MaxBits is 31.
     dmp.match_maxbits = 32;
     let mut patches = dmp.patch_make1("abcdefghijklmnopqrstuvwxyz01234567890", "XabXcdXefXghXijXklXmnXopXqrXstXuvXwxXyzX01X23X45X67X89X0");
@@ -884,7 +884,7 @@ pub fn test_patch_splitmax() {
 #[test]
 pub fn test_patch_add_padding() {
     // Both edges full.
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut patches = dmp.patch_make1("", "test");
     assert_eq!("@@ -0,0 +1,4 @@\n+test\n".to_string(), dmp.patch_to_text(&mut patches));
     dmp.patch_add_padding(&mut patches);
@@ -906,7 +906,7 @@ pub fn test_patch_add_padding() {
 
 #[test]
 pub fn test_patch_apply() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     dmp.match_distance = 1000;
     dmp.match_threshold = 0.5;
     dmp.patch_delete_threshold = 0.5;
