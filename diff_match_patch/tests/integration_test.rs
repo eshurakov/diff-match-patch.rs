@@ -407,6 +407,14 @@ pub fn test_diff_text() {
     assert_eq!("jumped over a lazy".to_string(), dmp.diff_text2(&mut diffs));
 }
 
+#[test]
+pub fn test_diff_text2_u16() {
+    let dmp = diff_match_patch::Dmp::new();
+    assert_eq!(
+        dmp.diff_text2_from_delta_u16("🅰", "-2\t+%F0%9F%85%B1"), 
+        dmp.diff_text2_from_delta_u16("🅰", "=1\t-1\t+%ED%B5%B1")
+    );
+}
 
 #[test]
 pub fn test_diff_delta() {
@@ -581,6 +589,16 @@ pub fn test_diff_from_delta_unit() {
     delta = "-1\t=1\t+%F0%9F%85%B1";
     diffs = dmp.diff_from_delta("🅰🅲", delta, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!(dmp.diff_text2(&mut diffs), "🅲🅱");
+}
+
+#[test]
+pub fn test_diff_from_delta_split_surrogates() {
+    let dmp = diff_match_patch::Dmp::new();
+
+    assert_eq!(
+        dmp.diff_from_delta("🅰", "-2\t+%F0%9F%85%B1", diff_match_patch::Unit::UTF16), 
+        dmp.diff_from_delta("🅰", "=1\t-1\t+%ED%B5%B1", diff_match_patch::Unit::UTF16)
+    );
 }
 
 #[test]

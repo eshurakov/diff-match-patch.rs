@@ -1799,6 +1799,7 @@ impl Dmp {
     pub fn diff_text2_from_delta_u16(&self, text1: &str, delta: &str) -> String {
         /*
             Compute and return the destination text (all equalities and insertions).
+            Delta offsets are interpreted in u16 code units
 
             Args:
                 text1: Original text
