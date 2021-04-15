@@ -18,8 +18,6 @@ use url::percent_encoding::{
     };
 #[allow(dead_code)]
 pub struct Dmp {
-    pub text1: String,
-    pub text2: String,
     // Cost of an empty edit operation in terms of edit characters.
     pub edit_cost: i32,
     /*How far to search for a match (0 = exact location, 1000+ = broad match).
@@ -209,7 +207,7 @@ impl Dmp {
     #[allow(dead_code)]
     pub fn new() -> Self {
         // it will give a new dmp object.
-        Dmp { patch_delete_threshold: 0.5, text1: "".to_string(), text2: "".to_string(), edit_cost: 4, match_distance: 1000, patch_margin: 4, match_maxbits: 32, match_threshold: 0.5}
+        Dmp { patch_delete_threshold: 0.5, edit_cost: 4, match_distance: 1000, patch_margin: 4, match_maxbits: 32, match_threshold: 0.5}
     }
 
     #[allow(dead_code)]
