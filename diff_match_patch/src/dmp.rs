@@ -1755,7 +1755,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn diff_text1(&self, diffs: &mut Vec<Diff>) -> String {
+    pub fn diff_text1(&self, diffs: &Vec<Diff>) -> String {
         /*
         Compute and return the source text (all equalities and deletions).
 
@@ -1775,7 +1775,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn diff_text2(&self, diffs: &mut Vec<Diff>) -> String {
+    pub fn diff_text2(&self, diffs: &Vec<Diff>) -> String {
         /*
         Compute and return the destination text (all equalities and insertions).
 
@@ -1877,7 +1877,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn diff_to_delta(&self, diffs: &mut Vec<Diff>, unit: Unit) -> String {
+    pub fn diff_to_delta(&self, diffs: &Vec<Diff>, unit: Unit) -> String {
         /*
         Crush the diff into an encoded string which describes the operations
         required to transform text1 into text2.
@@ -2289,7 +2289,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn patch_make2(&self, diffs: &mut Vec<Diff>) -> Vec<Patch> {
+    pub fn patch_make2(&self, diffs: &Vec<Diff>) -> Vec<Patch> {
         /*
         Compute a list of patches to turn text1 into text2.
         Use diffs to compute first text.
@@ -2304,7 +2304,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn patch_make3(&self, text1: &str, _text2: &str, diffs: &mut Vec<Diff>) -> Vec<Patch> {
+    pub fn patch_make3(&self, text1: &str, _text2: &str, diffs: &Vec<Diff>) -> Vec<Patch> {
         /*
         Compute a list of patches to turn text1 into text2.
 
@@ -2318,7 +2318,7 @@ impl Dmp {
       */
         self.patch_make4(text1, diffs)
     }
-    pub fn patch_make4(&self, text1: &str, diffs: &mut Vec<Diff>) -> Vec<Patch> {
+    pub fn patch_make4(&self, text1: &str, diffs: &Vec<Diff>) -> Vec<Patch> {
         /*
         Compute a list of patches to turn text1 into text2.
 
@@ -2402,7 +2402,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn patch_deep_copy(&self, patches: &mut Vec<Patch>) -> Vec<Patch> {
+    pub fn patch_deep_copy(&self, patches: &Vec<Patch>) -> Vec<Patch> {
         /*
         Given an Vector of patches, return another Vector that is identical.
 
@@ -2429,7 +2429,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn patch_apply(&self, patches: &mut Vec<Patch>, source_text: &str) -> (Vec<char>, Vec<bool>) {
+    pub fn patch_apply(&self, patches: &Vec<Patch>, source_text: &str) -> (Vec<char>, Vec<bool>) {
         /*
         Merge a set of patches onto the text.  Return a patched text, as well
         as a list of true/false values indicating which patches were applied.
@@ -2744,7 +2744,7 @@ impl Dmp {
     }
 
     #[allow(dead_code)]
-    pub fn patch_to_text(&self, patches: &mut Vec<Patch>) -> String {
+    pub fn patch_to_text(&self, patches: &Vec<Patch>) -> String {
         /*
         Take a list of patches and return a textual representation.
 

@@ -363,7 +363,7 @@ pub fn test_diff_cleanup_semantic() {
 
 #[test]
 pub fn test_diff_cleanup_efficiency() { 
-    let dmp = diff_match_patch::Dmp::new();  
+    let mut dmp = diff_match_patch::Dmp::new();  
     dmp.edit_cost = 4;
     // Null case.
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
@@ -612,7 +612,7 @@ pub fn test_diff_bisect() {
 
 #[test]
 pub fn test_diff_main() {
-    let mut new_dmp = diff_match_patch::Dmp::new();
+    let new_dmp = diff_match_patch::Dmp::new();
     let temp: Vec<diff_match_patch::Diff> = Vec::new();
     assert_eq!(temp, new_dmp.diff_main("", "", true));
     assert_eq!(vec![diff_match_patch::Diff::new(0, "abc".to_string())], new_dmp.diff_main("abc", "abc", true));
@@ -667,7 +667,7 @@ pub fn test_match_apphabet() {
 
 #[test]
 pub fn test_match_bitap() {
-    let dmp = diff_match_patch::Dmp::new();
+    let mut dmp = diff_match_patch::Dmp::new();
     dmp.match_distance = 100;
     dmp.match_threshold = 0.5;
     assert_eq!(5, dmp.match_bitap(&("abcdefghijk".chars().collect()), &("fgh".chars().collect()), 5));
@@ -717,7 +717,7 @@ pub fn test_match_bitap() {
 
 #[test]
 pub fn test_match_main() {
-    let dmp = diff_match_patch::Dmp::new();
+    let mut dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.match_main("abcdef", "abcdef", 1000));
 
     assert_eq!(-1, dmp.match_main("", "abcdef", 1));
@@ -780,7 +780,7 @@ pub fn test_patch_to_text() {
 #[test]
 pub fn test_patch_add_context()
 {
-    let dmp = diff_match_patch::Dmp::new();
+    let mut dmp = diff_match_patch::Dmp::new();
     dmp.patch_margin = 4;
     let mut p = dmp.patch_from_text("@@ -21,4 +21,10 @@\n-jump\n+somersault\n".to_string())[0].clone();
     dmp.patch_add_context(&mut p, &mut ("The quick brown fox jumps over the lazy dog.".chars().collect()));
@@ -859,7 +859,7 @@ pub fn test_patch_make() {
 
 #[test]
 pub fn test_patch_splitmax() {
-    let dmp = diff_match_patch::Dmp::new();
+    let mut dmp = diff_match_patch::Dmp::new();
     // Assumes that Match_MaxBits is 31.
     dmp.match_maxbits = 32;
     let mut patches = dmp.patch_make1("abcdefghijklmnopqrstuvwxyz01234567890", "XabXcdXefXghXijXklXmnXopXqrXstXuvXwxXyzX01X23X45X67X89X0");
@@ -906,7 +906,7 @@ pub fn test_patch_add_padding() {
 
 #[test]
 pub fn test_patch_apply() {
-    let dmp = diff_match_patch::Dmp::new();
+    let mut dmp = diff_match_patch::Dmp::new();
     dmp.match_distance = 1000;
     dmp.match_threshold = 0.5;
     dmp.patch_delete_threshold = 0.5;
