@@ -870,18 +870,24 @@ impl Dmp {
                 }
             }
             else {
-                if linearray.len() == 1_114_111 {
-                    // Bail out at 1114111 because chr(1114112) throws.
+                let mut u32char = linearray.len() as i32;
+
+                // skip surrogates range - U+D800 to U+DFFF
+                if u32char >= 55296 {
+                    u32char += 2048;
+                }
+
+                // 1114111 is the biggest unicode scalar, so stop here
+                if u32char == 1114111 {
                     line = text[(line_start as usize)..].iter().collect();
                     line_end = text.len() as i32 - 1;
                 }
-                line_start = line_end + 1;
+
                 linearray.push(line.clone());
-                linehash.insert(line.clone(), linearray.len() as i32 - 1);
-                if let Some(char1) = char::from_u32(linehash[&line] as u32) {
-                    chars.push(char1);
-                    line_start = line_end + 1;
-                }
+                linehash.insert(line.clone(), u32char);
+
+                chars.push(char::from_u32(u32char as u32).unwrap());
+                line_start = line_end + 1;
             }
         }
         chars
