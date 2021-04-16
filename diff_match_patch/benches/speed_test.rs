@@ -12,7 +12,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     let file1 = fs::read_to_string("./benches/Speedtest1.txt").unwrap();
     let file2 = fs::read_to_string("./benches/Speedtest2.txt").unwrap();
 
-    c.bench_function("dmp-speedtest", |b| b.iter(|| test(black_box(&file1), black_box(&file2)) ));
+    c.bench_function("diff-main-speedtest", |b| b.iter(|| test(black_box(&file1), black_box(&file2)) ));
 }
 
 criterion_group!(benches, criterion_benchmark);
