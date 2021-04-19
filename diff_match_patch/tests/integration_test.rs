@@ -170,23 +170,25 @@ pub fn test_diff_chars_tolines() {
 #[test]
 pub fn diff_lines_tochars_munge() {
     let dmp = diff_match_patch::Dmp::new();
-    // 1114111 - max unicode scalar
-    // 2048 - utf16 reserved characters that can't be used
-    let max_lines = 1114111 - 2048;
 
-    let mut text: Vec<char> = Vec::with_capacity(max_lines);
-    for i in 0..=max_lines {
+    // Unicode codepoints from 55296 to 57344 are reserved and can't be used as a scalar
+    let number_of_lines = 60000;
+
+    let mut text: Vec<char> = Vec::with_capacity(number_of_lines);
+    for i in 0..=number_of_lines {
         text.extend(i.to_string().chars());
-        text.extend("\n".chars());
+        if i + 1 < number_of_lines {
+            text.extend("\n".chars());
+        }
     }
 
     let mut linearray: Vec<String> = vec!["".to_string()];
     let mut linehash: HashMap<String, i32> = HashMap::new();
     let chars1 = dmp.diff_lines_tochars_munge(&text, &mut linearray, &mut linehash);
 
-    assert_eq!(chars1.chars().count(), max_lines);
-    assert_eq!(linearray.len() - 1, max_lines);
-    assert_eq!(linehash.len(), max_lines);
+    assert_eq!(chars1.chars().count(), number_of_lines);
+    assert_eq!(linearray.len() - 1, number_of_lines);
+    assert_eq!(linehash.len(), number_of_lines);
 }
 
 #[test]
