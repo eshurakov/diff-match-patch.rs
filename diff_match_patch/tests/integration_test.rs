@@ -19,7 +19,7 @@ pub fn diff_rebuildtexts( diffs: Vec<diff_match_patch::Diff>) -> Vec<String> {
 
 #[test]
 pub fn test_diff_common_prefix() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.diff_common_prefix(&("abc".to_string().chars().collect()), &("xyz".to_string().chars().collect())));
 
     assert_eq!(4, dmp.diff_common_prefix(&("1234abcdef".to_string().chars().collect()), &("1234xyz".to_string().chars().collect())));
@@ -30,7 +30,7 @@ pub fn test_diff_common_prefix() {
 
 #[test]
 pub fn test_diff_common_suffix() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.diff_common_suffix(&("abc".to_string().chars().collect()), &("xyz".to_string().chars().collect())));
 
     assert_eq!(4, dmp.diff_common_suffix(&("abcdef1234".to_string().chars().collect()), &("xyz1234".to_string().chars().collect())));
@@ -41,7 +41,7 @@ pub fn test_diff_common_suffix() {
 
 #[test]
 pub fn test_diff_common_overlap() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(0, dmp.diff_common_overlap(&("".to_string().chars().collect()), &("abcd".to_string().chars().collect())));
 
     assert_eq!(3, dmp.diff_common_overlap(&("abc".to_string().chars().collect()), &("abcd".to_string().chars().collect())));
@@ -53,7 +53,7 @@ pub fn test_diff_common_overlap() {
 
 #[test]
 pub fn test_diff_half_match() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let temp: Vec<String> = vec![];
     assert_eq!(temp, dmp.diff_half_match(&("1234567890".to_string().chars().collect()), &("abcdef".to_string().chars().collect())));
     assert_eq!(temp, dmp.diff_half_match(&("12345".to_string().chars().collect()), &("23".to_string().chars().collect())));
@@ -70,7 +70,7 @@ pub fn test_diff_half_match() {
 
 #[test]
 pub fn test_diff_lines_tochars() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(("\x01\x02\x01".to_string(), "\x02\x01\x02".to_string(), vec!["".to_string(), "alpha\n".to_string(), "beta\n".to_string()]),
                 dmp.diff_lines_tochars(&("alpha\nbeta\nalpha\n".to_string().chars().collect()), &("beta\nalpha\nbeta\n".to_string().chars().collect())));
     assert_eq!(("".to_string(), "\x01\x02\x03\x03".to_string(), vec!["".to_string(), "alpha\r\n".to_string(), "beta\r\n".to_string(), "\r\n".to_string()]), dmp.diff_lines_tochars(&("".to_string().chars().collect()), &("alpha\r\nbeta\r\n\r\n\r\n".to_string().chars().collect())));
@@ -98,7 +98,7 @@ pub fn test_diff_lines_tochars() {
 
 #[test]
 pub fn test_diff_words_tochars() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(("\x01\x02\x03\x02\x01".to_string(), "\x03\x02\x01\x02\x03".to_string(), vec!["".to_string(), "alpha".to_string(), " ".to_string(), "beta".to_string()]),
                 dmp.diff_words_tochars(&"alpha beta alpha".to_string(), &"beta alpha beta".to_string())
                );               
@@ -135,7 +135,7 @@ pub fn test_diff_words_tochars() {
 
 #[test]
 pub fn test_diff_chars_tolines() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs = vec![diff_match_patch::Diff::new(0, "\x01\x02\x01".to_string()), diff_match_patch::Diff::new(1, "\x02\x01\x02".to_string())];
     dmp.diff_chars_tolines(&mut diffs, &vec!["".to_string(), "alpha\n".to_string(), "beta\n".to_string()]);
     assert_eq!(vec![diff_match_patch::Diff::new(0, "alpha\nbeta\nalpha\n".to_string()), diff_match_patch::Diff::new(1, "beta\nalpha\nbeta\n".to_string())], diffs);
@@ -144,14 +144,7 @@ pub fn test_diff_chars_tolines() {
     let mut char_list: Vec<char> = vec![];
     for i in 1..n + 1 {
         line_list.push(i.to_string() + "\n");
-        match char::from_u32(i) {
-            Some(ch) => {
-                char_list.push(ch);
-            }
-            None => {
-
-            }
-        }
+        char_list.push(char::from_u32(i).unwrap());
     }
     let chars: String = char_list.into_iter().collect();
     assert_eq!(n as usize, line_list.len());
@@ -161,6 +154,7 @@ pub fn test_diff_chars_tolines() {
     let mut diffs = vec![diff_match_patch::Diff::new(-1, chars)];
     dmp.diff_chars_tolines(&mut diffs, &line_list);
     assert_eq!(diffs, vec![diff_match_patch::Diff::new(-1, lines)]);
+
     // line_list = vec![];
     // for i in 1..1115000 + 1 {
     //     line_list.push(i.to_string() + "\n");
@@ -173,11 +167,33 @@ pub fn test_diff_chars_tolines() {
     // assert_eq!(chars, diffs[0].text);
 }
 
+#[test]
+pub fn diff_lines_tochars_munge() {
+    let dmp = diff_match_patch::Dmp::new();
 
+    // Unicode codepoints from 55296 to 57344 are reserved and can't be used as a scalar
+    let number_of_lines = 60000;
+
+    let mut text: Vec<char> = Vec::with_capacity(number_of_lines);
+    for i in 0..=number_of_lines {
+        text.extend(i.to_string().chars());
+        if i + 1 < number_of_lines {
+            text.extend("\n".chars());
+        }
+    }
+
+    let mut linearray: Vec<String> = vec!["".to_string()];
+    let mut linehash: HashMap<String, i32> = HashMap::new();
+    let chars1 = dmp.diff_lines_tochars_munge(&text, &mut linearray, &mut linehash);
+
+    assert_eq!(chars1.chars().count(), number_of_lines);
+    assert_eq!(linearray.len() - 1, number_of_lines);
+    assert_eq!(linehash.len(), number_of_lines);
+}
 
 #[test]
 pub fn test_diff_cleanup_merge() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
     let temp: Vec<diff_match_patch::Diff> = vec![];
     dmp.diff_cleanup_merge(&mut diffs);
@@ -256,7 +272,7 @@ pub fn test_diff_cleanup_merge() {
 pub fn test_diff_cleanup_semantic_lossless() {
     // Slide diffs to match logical boundaries.
     // Null case.
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
     let temp: Vec<diff_match_patch::Diff> = vec![];
     dmp.diff_cleanup_semantic_lossless(&mut diffs);
@@ -302,7 +318,7 @@ pub fn test_diff_cleanup_semantic_lossless() {
 
 #[test]
 pub fn test_diff_cleanup_semantic() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
 
     //  Null case.
     let mut diffs: Vec<diff_match_patch::Diff> = vec![];
@@ -401,25 +417,33 @@ pub fn test_diff_cleanup_efficiency() {
 
 #[test]
 pub fn test_diff_text() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs: Vec<diff_match_patch::Diff> = vec![diff_match_patch::Diff::new(0, "jump".to_string()), diff_match_patch::Diff::new(-1, "s".to_string()), diff_match_patch::Diff::new(1, "ed".to_string()), diff_match_patch::Diff::new(0, " over ".to_string()), diff_match_patch::Diff::new(-1, "the".to_string()), diff_match_patch::Diff::new(1, "a".to_string()), diff_match_patch::Diff::new(0, " lazy".to_string())];
     assert_eq!("jumps over the lazy".to_string(), dmp.diff_text1(&mut diffs));
     assert_eq!("jumped over a lazy".to_string(), dmp.diff_text2(&mut diffs));
 }
 
+#[test]
+pub fn test_diff_text2_u16() {
+    let dmp = diff_match_patch::Dmp::new();
+    assert_eq!(
+        dmp.diff_text2_from_delta_u16("🅰", "-2\t+%F0%9F%85%B1"), 
+        dmp.diff_text2_from_delta_u16("🅰", "=1\t-1\t+%ED%B5%B1")
+    );
+}
 
 #[test]
 pub fn test_diff_delta() {
 
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut diffs = vec![diff_match_patch::Diff::new(0, "jump".to_string()), diff_match_patch::Diff::new(-1, "s".to_string()), diff_match_patch::Diff::new(1, "ed".to_string()), diff_match_patch::Diff::new(0, " over ".to_string()), diff_match_patch::Diff::new(-1, "the".to_string()), diff_match_patch::Diff::new(1, "a".to_string()), diff_match_patch::Diff::new(0, " lazy".to_string()), diff_match_patch::Diff::new(1, "old dog".to_string())];
     let mut text1 = dmp.diff_text1(&mut diffs);
     assert_eq!("jumps over the lazy".to_string(), text1);
-    let mut delta = dmp.diff_todelta(&mut diffs);
+    let mut delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!("=4\t-1\t+ed\t=6\t-3\t+a\t=5\t+old dog".to_string(), delta);
 
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta, diff_match_patch::Unit::UnicodeScalar));
 
     // # Generates error (19 != 20).
     // try:
@@ -451,21 +475,21 @@ pub fn test_diff_delta() {
     text1 = dmp.diff_text1(&mut diffs);
     assert_eq!("\u{0680} \x00 \t %\u{0681} \x01 \n ^".to_string(), text1);
 
-    delta = dmp.diff_todelta(&mut diffs);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!("=7\t-7\t+%DA%82 %02 %5C %7C".to_string(), delta);
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&text1, &delta, diff_match_patch::Unit::UnicodeScalar));
 
     // Verify pool of unchanged characters.
     diffs = vec![diff_match_patch::Diff::new(1, "A-Z a-z 0-9 - _ . ! ~ * ' ( ) ; / ? : @ & = + $ , # ".to_string())];
     let text2 = dmp.diff_text2(&mut diffs);
     assert_eq!("A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ".to_string(), text2);
 
-    delta = dmp.diff_todelta(&mut diffs);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!("+A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ".to_string(), delta);
 
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&("".to_string()), &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&("".to_string()), &delta, diff_match_patch::Unit::UnicodeScalar));
 
     // 160 kb string.
     let mut a = "abcdefghij".to_string();
@@ -473,13 +497,125 @@ pub fn test_diff_delta() {
         a += a.clone().as_str();
     }
     diffs = vec![diff_match_patch::Diff::new(1, a.clone())];
-    delta = dmp.diff_todelta(&mut diffs);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
     assert_eq!('+'.to_string() + a.as_str(), delta);
 
     // Convert delta string into a diff.
-    assert_eq!(diffs, dmp.diff_from_delta(&"".to_string(), &delta));
+    assert_eq!(diffs, dmp.diff_from_delta(&"".to_string(), &delta, diff_match_patch::Unit::UnicodeScalar));
+
+    // Emoji
+    diffs = dmp.diff_main("☺️🖖🏿", "☺️😃🖖🏿", false);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16);
+    assert_eq!(delta, "=2\t+%F0%9F%98%83\t=4");
+
+    diffs = dmp.diff_main("☺️🖖🏿", "☺️😃🖖🏿", false);
+    let mut patches = dmp.patch_make2(&mut diffs);
+    let (patched_text_vec, _) = dmp.patch_apply(&mut patches, "☺️🖖🏿");
+    let patched_text: String = patched_text_vec.into_iter().collect();
+    assert_eq!(patched_text, "☺️😃🖖🏿");
 }
 
+#[test]
+pub fn test_diff_delta_surrogates() {
+    let dmp = diff_match_patch::Dmp::new();
+
+    // Inserting similar surrogate pair at beginning
+    let mut diffs = dmp.diff_main("🅰🅱", "🅱🅰🅱", false);
+    let mut expected_diffs = vec![
+        diff_match_patch::Diff::new(1, "🅱".to_string()),
+        diff_match_patch::Diff::new(0, "🅰🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Inserting similar surrogate pair in the middle
+    diffs = dmp.diff_main("🅱🅱", "🅱🅰🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(0, "🅱".to_string()),
+        diff_match_patch::Diff::new(1, "🅰".to_string()),
+        diff_match_patch::Diff::new(0, "🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Deleting similar surrogate pair at the beginning
+    diffs = dmp.diff_main("🅱🅰🅱", "🅰🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(-1, "🅱".to_string()),
+        diff_match_patch::Diff::new(0, "🅰🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Deleting similar surrogate pair in the middle
+    diffs = dmp.diff_main("🅰🅲🅱", "🅰🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(0, "🅰".to_string()),
+        diff_match_patch::Diff::new(-1, "🅲".to_string()),
+        diff_match_patch::Diff::new(0, "🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+
+    // Swapping surrogate pairs
+    diffs = dmp.diff_main("🅰", "🅱", false);
+    expected_diffs = vec![
+        diff_match_patch::Diff::new(-1, "🅰".to_string()),
+        diff_match_patch::Diff::new(1, "🅱".to_string()),
+    ];
+    assert_eq!(
+        dmp.diff_to_delta(&mut expected_diffs, diff_match_patch::Unit::UTF16),
+        dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16),
+    );
+}
+
+#[test]
+pub fn test_diff_to_delta_unit() {
+    let dmp = diff_match_patch::Dmp::new();
+
+    // UTF16
+    let mut diffs = dmp.diff_main("🅰", "🅱", false);
+    let mut delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UTF16);
+    assert_eq!(delta, "-2\t+%F0%9F%85%B1");
+
+    // Scalar
+    let mut diffs = dmp.diff_main("🅰", "🅱", false);
+    delta = dmp.diff_to_delta(&mut diffs, diff_match_patch::Unit::UnicodeScalar);
+    assert_eq!(delta, "-1\t+%F0%9F%85%B1");
+}
+
+#[test]
+pub fn test_diff_from_delta_unit() {
+    let dmp = diff_match_patch::Dmp::new();
+
+    // UTF16
+    let mut delta = "-2\t=2\t+%F0%9F%85%B1";
+    let mut diffs = dmp.diff_from_delta("🅰🅲", delta, diff_match_patch::Unit::UTF16);
+    assert_eq!(dmp.diff_text2(&mut diffs), "🅲🅱");
+
+    // Scalar
+    delta = "-1\t=1\t+%F0%9F%85%B1";
+    diffs = dmp.diff_from_delta("🅰🅲", delta, diff_match_patch::Unit::UnicodeScalar);
+    assert_eq!(dmp.diff_text2(&mut diffs), "🅲🅱");
+}
+
+#[test]
+pub fn test_diff_from_delta_split_surrogates() {
+    let dmp = diff_match_patch::Dmp::new();
+
+    assert_eq!(
+        dmp.diff_from_delta("🅰", "-2\t+%F0%9F%85%B1", diff_match_patch::Unit::UTF16), 
+        dmp.diff_from_delta("🅰", "=1\t-1\t+%ED%B5%B1", diff_match_patch::Unit::UTF16)
+    );
+}
 
 #[test]
 pub fn test_diff_xindex() {
@@ -490,7 +626,7 @@ pub fn test_diff_xindex() {
 #[test]
 pub fn test_diff_levenshtein() {
 
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     assert_eq!(4, dmp.diff_levenshtein(&mut vec![diff_match_patch::Diff::new(-1, "abc".to_string()), diff_match_patch::Diff::new(1, "1234".to_string()), diff_match_patch::Diff::new(0, "xyz".to_string())]));
     // Levenshtein with leading equality.
     assert_eq!(4, dmp.diff_levenshtein(&mut vec![diff_match_patch::Diff::new(0, "xyz".to_string()), diff_match_patch::Diff::new(-1, "abc".to_string()), diff_match_patch::Diff::new(1, "1234".to_string())]));
@@ -501,16 +637,33 @@ pub fn test_diff_levenshtein() {
 
 #[test]
 pub fn test_diff_bisect() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let a = "cat".to_string();
     let b = "map".to_string();
     assert_eq!(vec![diff_match_patch::Diff::new(-1, "c".to_string()), diff_match_patch::Diff::new(1, "m".to_string()), diff_match_patch::Diff::new(0, "a".to_string()), diff_match_patch::Diff::new(-1, "t".to_string()), diff_match_patch::Diff::new(1, "p".to_string())] , dmp.diff_bisect(&a.chars().collect(), &b.chars().collect()));
 }
 
+#[test]
+pub fn test_diff_bisect_timeout() {
+    let mut dmp = diff_match_patch::Dmp::new();
+    dmp.diff_timeout = Some(0.0);
+
+    let a = "cat".to_string();
+    let b = "map".to_string();
+
+    let expected = vec![
+        diff_match_patch::Diff::new(-1, "cat".to_string()),
+        diff_match_patch::Diff::new(1, "map".to_string())
+    ];
+
+    let result = dmp.diff_bisect(&a.chars().collect(), &b.chars().collect());
+
+    assert_eq!(expected, result);
+}
 
 #[test]
 pub fn test_diff_main() {
-    let mut new_dmp = diff_match_patch::Dmp::new();
+    let new_dmp = diff_match_patch::Dmp::new();
     let temp: Vec<diff_match_patch::Diff> = Vec::new();
     assert_eq!(temp, new_dmp.diff_main("", "", true));
     assert_eq!(vec![diff_match_patch::Diff::new(0, "abc".to_string())], new_dmp.diff_main("abc", "abc", true));
@@ -550,7 +703,7 @@ pub fn test_diff_main() {
 
 #[test]
 pub fn test_match_apphabet() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut s: HashMap<char,i32> = HashMap::new();
     s.insert('a', 4);
     s.insert('b', 2);
@@ -648,7 +801,7 @@ pub fn test_patch_obj() {
 
 #[test]
 pub fn test_patch_from_text() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let diffs: Vec<diff_match_patch::Patch> = vec![];
     assert_eq!(diffs, dmp.patch_from_text("".to_string()));
     
@@ -664,7 +817,7 @@ pub fn test_patch_from_text() {
 
 #[test]
 pub fn test_patch_to_text() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let  mut strp = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n  laz\n".to_string();
     let mut p = dmp.patch_from_text(strp.clone());
     assert_eq!(strp, dmp.patch_to_text(&mut p));
@@ -703,7 +856,7 @@ pub fn test_patch_add_context()
 
 #[test]
 pub fn test_patch_make() {
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     // Null case.
     let mut patches = dmp.patch_make1("", "");
     assert_eq!("".to_string(), dmp.patch_to_text(&mut patches));
@@ -782,7 +935,7 @@ pub fn test_patch_splitmax() {
 #[test]
 pub fn test_patch_add_padding() {
     // Both edges full.
-    let mut dmp = diff_match_patch::Dmp::new();
+    let dmp = diff_match_patch::Dmp::new();
     let mut patches = dmp.patch_make1("", "test");
     assert_eq!("@@ -0,0 +1,4 @@\n+test\n".to_string(), dmp.patch_to_text(&mut patches));
     dmp.patch_add_padding(&mut patches);

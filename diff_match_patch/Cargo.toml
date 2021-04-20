@@ -10,11 +10,13 @@ keywords = ["diff", "diff-match-patch"]
 categories = ["Development tools", "Text processing"]
 license = "MIT"
 
-
 [dependencies]
 url = "1.7.2"
 regex = "1.3.7"
 
-[[bin]]
-name = "main"
-path = "src/main.rs"
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "speed_test"
+harness = false
