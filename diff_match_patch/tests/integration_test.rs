@@ -147,7 +147,8 @@ pub fn test_diff_chars_tolines() {
     let mut diffs = vec![diff_match_patch::Diff::new(0, "\x01\x02\x01".to_string()), diff_match_patch::Diff::new(1, "\x02\x01\x02".to_string())];
     dmp.diff_chars_tolines(&mut diffs, &vec!["".to_string(), "alpha\n".to_string(), "beta\n".to_string()]);
     assert_eq!(vec![diff_match_patch::Diff::new(0, "alpha\nbeta\nalpha\n".to_string()), diff_match_patch::Diff::new(1, "beta\nalpha\nbeta\n".to_string())], diffs);
-    let n: u32 = 30;
+
+    let n: u32 = 300;
     let mut line_list: Vec<String> = vec![];
     let mut char_list: Vec<char> = vec![];
     for i in 1..n + 1 {
@@ -162,17 +163,6 @@ pub fn test_diff_chars_tolines() {
     let mut diffs = vec![diff_match_patch::Diff::new(-1, chars)];
     dmp.diff_chars_tolines(&mut diffs, &line_list);
     assert_eq!(diffs, vec![diff_match_patch::Diff::new(-1, lines)]);
-
-    // line_list = vec![];
-    // for i in 1..1115000 + 1 {
-    //     line_list.push(i.to_string() + "\n");
-    // }
-    // chars = line_list.join("");
-    // let mut temp: Vec<char> = chars.chars().collect();
-    // let (temp1, temp2, results) = dmp.diff_lines_tochars(&temp, &vec![]);
-    // diffs = vec![diff_match_patch::Diff::new(1, results[0].clone())];
-    // dmp.diff_chars_tolines(&mut diffs, results[2].clone().chars().collect()));
-    // assert_eq!(chars, diffs[0].text);
 }
 
 #[test]
@@ -627,9 +617,24 @@ pub fn test_diff_from_delta_split_surrogates() {
 
 #[test]
 pub fn test_diff_xindex() {
+    let dmp = diff_match_patch::Dmp::new();
 
+    // Translate a location in text1 to text2.
+    let mut diffs = vec![
+        diff_match_patch::Diff::new(-1, "a".to_string()),
+        diff_match_patch::Diff::new(1, "1234".to_string()),
+        diff_match_patch::Diff::new(0, "xyz".to_string()),
+    ];
+    assert_eq!(5, dmp.diff_xindex(&diffs, 2));
+    
+    // Translation on deletion.
+    diffs = vec![
+        diff_match_patch::Diff::new(0, "a".to_string()),
+        diff_match_patch::Diff::new(-1, "1234".to_string()),
+        diff_match_patch::Diff::new(0, "xyz".to_string()),
+    ];
+    assert_eq!(1, dmp.diff_xindex(&diffs, 3));
 }
-
 
 #[test]
 pub fn test_diff_levenshtein() {
