@@ -676,7 +676,7 @@ pub fn test_diff_bisect_timeout() {
 
 #[test]
 pub fn test_diff_main() {
-    let new_dmp = diff_match_patch::Dmp::new();
+    let mut new_dmp = diff_match_patch::Dmp::new();
     let temp: Vec<diff_match_patch::Diff> = Vec::new();
     assert_eq!(temp, new_dmp.diff_main("", "", true));
     assert_eq!(vec![diff_match_patch::Diff::new(0, "abc".to_string())], new_dmp.diff_main("abc", "abc", true));
@@ -691,14 +691,9 @@ pub fn test_diff_main() {
     assert_eq!(vec![diff_match_patch::Diff::new(1, "xaxcx".to_string()), diff_match_patch::Diff::new(0, "abc".to_string()), diff_match_patch::Diff::new(-1, "y".to_string())], new_dmp.diff_main("abcy", "xaxcxabc", false));
     assert_eq!(vec![diff_match_patch::Diff::new(-1, "ABCD".to_string()), diff_match_patch::Diff::new(0, "a".to_string()), diff_match_patch::Diff::new(-1, "=".to_string()), diff_match_patch::Diff::new(1, "-".to_string()), diff_match_patch::Diff::new(0, "bcd".to_string()), diff_match_patch::Diff::new(-1, "=".to_string()), diff_match_patch::Diff::new(1, "-".to_string()), diff_match_patch::Diff::new(0, "efghijklmnopqrs".to_string()), diff_match_patch::Diff::new(-1, "EFGHIJKLMNOefg".to_string())], new_dmp.diff_main("ABCDa=bcd=efghijklmnopqrsEFGHIJKLMNOefg", "a-bcd-efghijklmnopqrs", false));
     assert_eq!(vec![diff_match_patch::Diff::new(1, " ".to_string()), diff_match_patch::Diff::new(0, "a".to_string()), diff_match_patch::Diff::new(1, "nd".to_string()), diff_match_patch::Diff::new(0, " [[Pennsylvania]]".to_string()), diff_match_patch::Diff::new(-1, " and [[New".to_string())], new_dmp.diff_main("a [[Pennsylvania]] and [[New", " and [[Pennsylvania]]", false));
-
-    // let mut a: String = "`Twas brillig, and the slithy toves\nDid gyre and gimble in the wabe:\nAll mimsy were the borogoves,\nAnd the mome raths outgrabe.\n".to_string();
-    // let mut b: String = "I am the very model of a modern major general,\nI've information vegetable, animal, and mineral,\nI know the kings of England, and I quote the fights historical,\nFrom Marathon to Waterloo, in order categorical.\n".to_string();
-    // for x in 0..10 {
-    //     a += a.clone().as_str();
-    //     b += b.clone().as_str();
-    // }
-
+        
+    // Test the linemode speedup.
+    // Must be long to pass the 100 char cutoff.
     let mut a = "1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n1234567890\n";
     let mut b = "abcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\nabcdefghij\n";
     assert_eq!(new_dmp.diff_main(a, b, true), new_dmp.diff_main(a, b, false));
@@ -754,6 +749,9 @@ pub fn test_match_bitap() {
     assert_eq!(0, dmp.match_bitap(&("abcdef".chars().collect()), &("xabcdefy".chars().collect()), 0));
 
     // Threshold test.
+    dmp.match_threshold = 0.4;
+    assert_eq!(4, dmp.match_bitap(&("abcdefghijk".chars().collect()), &("efxyhi".chars().collect()), 1));
+
     dmp.match_threshold = 0.3;
     assert_eq!(-1, dmp.match_bitap(&("abcdefghijk".chars().collect()), &("efxyhi".chars().collect()), 1));
 
