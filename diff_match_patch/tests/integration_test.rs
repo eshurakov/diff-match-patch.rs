@@ -922,7 +922,6 @@ pub fn test_patch_make() {
 #[test]
 pub fn test_patch_splitmax() {
     let mut dmp = diff_match_patch::Dmp::new();
-    // Assumes that Match_MaxBits is 31.
     dmp.match_maxbits = 32;
     let mut patches = dmp.patch_make1("abcdefghijklmnopqrstuvwxyz01234567890", "XabXcdXefXghXijXklXmnXopXqrXstXuvXwxXyzX01X23X45X67X89X0");
     dmp.patch_splitmax(&mut patches);
